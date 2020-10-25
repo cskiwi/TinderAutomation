@@ -1,0 +1,9 @@
+/validation
+/bot
+/__pycache__
+chromedriver*
+auth.json
+
+*.log
+*.npy
+auth.json

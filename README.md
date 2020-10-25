@@ -1,6 +1,7 @@
 # TinderAutomation
 
 ![Alt text](/img/tinder.png?raw=true "Optional Title")
+https://github.com/jeffmli/TinderAutomation/blob/master/README.md
 
 ## 1. Introduction
 

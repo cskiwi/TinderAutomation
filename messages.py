@@ -1,3 +1,3 @@
 messages = [
-    [u'INSERT YOUR OPENING LINE HERE']
+ u'Hey hoi, klaar voor het weekend?'
 ]

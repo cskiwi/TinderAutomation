@@ -8,7 +8,14 @@ from random import randint
 from messages import messages
 from image_processing import extract_faces
 import numpy as np
-from keras.models import load_model
+from tensorflow.keras.models import load_model
+import random
+
+# random bugfixes
+import tensorflow as tf
+gpu = tf.config.experimental.list_physical_devices('GPU')
+tf.config.experimental.set_memory_growth(gpu[0], True)
+
 
 def check_swipes(session):
     '''
@@ -28,7 +35,12 @@ def like_or_nope(user, compiled_model):
     photos = user.get_photos()
 
     print("Fetched user photos..")
+    likes = 0
+    dislikes = 0
+    total = 0
+
     for photo in photos:
+        total += 1
         image = imread(photo)
         # imshow(image) # Shows image of person
         # show()
@@ -36,12 +48,17 @@ def like_or_nope(user, compiled_model):
         if len(face) != 0:
             prediction = compiled_model.predict(face) # Add the model file here instead
             if prediction[0][1] > 0.4:
-                return "like"
+                likes += 1
             else:
-                return "dislike"
-            break
+                dislikes += 1
         else:
             print("AI cannot tell from photo. Retrieving next photo")
+
+    print(f"Of all fetched {total} photos I (the AI) like a total of {likes} photos and disliked {dislikes}")
+    if likes > dislikes:
+        return "like"
+    else:
+        return "dislike"
 
 def swipe(session,model,n):
     '''
@@ -71,6 +88,9 @@ def swipe(session,model,n):
                         user.like()
                         total_swipes -= 1
                         likes += 1
+                        for photo in user.photos:
+                            image = imread(photo)
+                            save_image(image, photo, False, 'bot', f"{user.name}_{user.id}")
                         print('The Bae-ta Miner liked ' + user.name + '! Wohoooo!!!!!!!')
                         print('-------------------------------------------------------')
                         sleep(randint(3,15))
@@ -78,6 +98,9 @@ def swipe(session,model,n):
                         user.dislike()
                         total_swipes -= 1
                         dislikes += 1
+                        for photo in user.photos:
+                            image = imread(photo)
+                            save_image(image, photo, False, 'bot',  f"{user.name}_{user.id}")
                         print('The Bae-ta Miner disliked ' + user.name+ ' *Sad Face*')
                         print('-------------------------------------------------------')
                         sleep(randint(3,15))
@@ -94,8 +117,9 @@ def send_message(session):
     '''
     matches = session.matches()
     for match in matches:
-        print("Sending message: " + messages)
-        match.message(messages)
+        to_send_message = random.choice(messages)
+        print("Sending message: " + to_send_message)
+        match.message(to_send_message)
 
 if __name__=='__main__':
     print('Hi Jeff. Im the Bae-ta Miner. I know the online dating process is a huge hassle.')
@@ -112,22 +136,22 @@ if __name__=='__main__':
     print('Starting Tinder Session........')
     print('Tinder session started!')
     ## Start Tinder Session
-    session = pynder.Session(facebook_token=FBTOKEN)
+    session = pynder.Session(facebook_token=FBTOKEN, facebook_id=FBID)
 
     print('-----------------------------------------------------------------------------')
     print('Loading model..............')
-    model = load_model("model_V3.h5")
+    model = load_model("model_V4.h5")
 
     print('-----------------------------------------------------------------------------')
     ## Swipe Through users
     print('How many times would you like me to swipe this session?')
-    total_swipes = input()
+    total_swipes = int(input())
 
     swipe(session, model, total_swipes)
-    print('-----------------------------------------------------------------------------')
-    print('Now, sending automated messages to current matches........')
+    # print('-----------------------------------------------------------------------------')
+    # print('Now, sending automated messages to current matches........')
 
     ## Send messages to the matches
-    send_message(session)
+    # send_message(session)
 
     print('You have Tindered for the day. Have a great day!')
